@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/jmccutchen/EmployeeTracker#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
+    "figlet": "^1.2.4",
     "inquirer": "^7.0.1",
-    "msql": "^1.0.3"
+    "mysql": "^2.17.1"
   }
 }
