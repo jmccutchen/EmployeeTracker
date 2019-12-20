@@ -61,7 +61,7 @@ function start() {
 
             }
             else if (answer.action === "View All Roles") {
-
+                viewAllRoles();
             }
 
         })
@@ -122,16 +122,12 @@ function viewAllEmpMan() {
                 })
                 .then((answer) => {
                     let query = "SELECT id, first_name, last_name, title, name, salary FROM employee LEFT JOIN role ON (employee.role_id = role.role_id) LEFT JOIN department ON (role.department_id = department.department_id) WHERE ?";
-
                     let answerArray = Object.values(answer)
                     let answerId = answerArray[0].split(" ")
-                    console.log(answerId[0])
 
                     connection.query(query, { manager_id: answerId[0] }, function (err, res) {
                         if (err) throw err;
-
-                        console.log(query)
-                        console.log("\n" + "\n")
+                        console.log("\n")
                         console.table(res)
                         console.log("\n" + "Move arrows to make another choice")
 
@@ -143,11 +139,37 @@ function viewAllEmpMan() {
         });
 }
 
-// function addEmployee() {
+function addEmployee() {
 
-//     //do a bunch of these for each entry
-//     connection.query("INSERT INTO tasks (task) VALUES (?)", [req.body.task], function (err, result) {
-//         if (err) throw err;
-//         INSERT INTO tasks//table// (task//column) VALUES (?)
-//     }
+    //do a bunch of these for each entry
+    connection.query("INSERT INTO tasks (task) VALUES (?)", [req.body.task], function (err, result) {
+        if (err) throw err;
+        INSERT INTO tasks//table// (task//column) VALUES (?)
+    }
+}
 
+
+
+
+
+
+
+
+
+
+
+
+function viewAllRoles(){
+    connection.query("SELECT title, salary FROM role;",
+        function (err, results) {
+            if (err) throw err;
+            console.log("\n" + "\n")
+            console.table(results)
+            console.log("\n" + "Move arrows to make another choice")
+        }
+    )
+    start()
+};
+
+
+}
