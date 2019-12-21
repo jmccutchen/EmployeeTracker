@@ -55,10 +55,13 @@ function start() {
                 removeEmp();
             }
             else if (answer.action === "Update Employee Role") {
-
+                updateEmpRole();
             }
             else if (answer.action === "Update Employee Manager") {
-
+                console.log("\n")
+                console.log("You will need approval from YOUR manager to carry out this function. Piss off.")
+                console.log("\n")
+                start()
             }
             else if (answer.action === "View All Roles") {
                 viewAllRoles();
@@ -73,10 +76,11 @@ function viewAllEmp() {
             if (err) throw err;
             console.log("\n" + "\n")
             console.table(results)
-            console.log("\n" + "Move arrows to make another choice")
+            console.log("\n")
+            start()
         }
     )
-    start()
+
 };
 
 function viewAllEmpDept() {
@@ -93,12 +97,11 @@ function viewAllEmpDept() {
                 if (err) throw err;
                 console.log("\n" + "\n")
                 console.table(res)
-                console.log("\n" + "Move arrows to make another choice")
+                console.log("\n")
+                start();
             })
         })
-        .then(() => {
-            start();
-        })
+
 }
 
 function viewAllEmpMan() {
@@ -129,13 +132,11 @@ function viewAllEmpMan() {
                         if (err) throw err;
                         console.log("\n")
                         console.table(res)
-                        console.log("\n" + "Move arrows to make another choice")
-
+                        console.log("\n")
+                        start();
                     });
                 })
-                .then(() => {
-                    start();
-                })
+
         });
 }
 
@@ -224,12 +225,13 @@ function addEmployee() {
                                             let managerId = answerId[0]
                                             connection.query(query, managerId, function (err, res) {
                                                 if (err) throw err;
-
+                                                console.log("\n")
+                                                console.log(`Employee's manager ID was updatede to ${managerId}`)
+                                                console.log("\n")
+                                                start();
                                             });
                                         })
-                                        .then(() => {
-                                            start();
-                                        })
+
                                 })
 
 
@@ -266,19 +268,71 @@ function removeEmp() {
                     let id = answerId[0]
                     connection.query(query, id, function (err, res) {
                         if (err) throw err;
-
+                        console.log("\n")
+                        console.log(`Employee ${Id} was deleted`)
+                        console.log("\n")
+                        start();
                     });
                 })
-                .then(() => {
-                    start();
-                })
-
-
 
 
         })
 }
 
+function updateEmpRole() {
+    connection.query("SELECT id, first_name, last_name, title, role.role_id AS role_id, name FROM employee, role, department WHERE employee.role_id = role.role_id AND role.department_id = department.department_id",
+        function (err, results) {
+            if (err) throw err;
+            inquirer
+                .prompt([
+                    {
+                        name: "updateEmp",
+                        type: "list",
+                        message: "Which employee's role would you like to update?",
+                        choices: function () {
+                            var choiceArray = [];
+                            for (var i = 0; i < results.length; i++) {
+                                choiceArray.push(results[i].id + " " + results[i].first_name + " " + results[i].last_name);
+                            }
+
+                            return choiceArray;
+                        }
+                    },
+                    {
+                        name: "role",
+                        type: "list",
+                        message: "What is their new role?",
+                        choices: function () {
+                            var choiceArray = [];
+                            for (var i = 0; i < results.length; i++) {
+                                choiceArray.push(results[i].role_id + " " + results[i].title);
+                            }
+
+                            return choiceArray;
+                        }
+                    }
+                ])
+                .then((answers) => {
+                    let query = "UPDATE employee SET role_id = ? WHERE id = ?";
+                    let answerArray = Object.values(answers)
+                    // to get employee ID
+                    let empId = answerArray[0].split(" ")
+                    let employeeId = empId[0]
+                    // to get role ID
+                    let role = answerArray[1].split(" ")
+                    let roleId = role[0]
+                    connection.query(query, [roleId, employeeId], function (err, res) {
+                        if (err) throw err;
+                        console.log("\n")
+                        console.log(`Employee ${employeeId} was updated to role ID: ${roleId}`)
+                        console.log("\n")
+                        start();
+
+                    });
+                })
+
+        })
+}
 
 
 function viewAllRoles() {
@@ -288,9 +342,9 @@ function viewAllRoles() {
             console.log("\n" + "\n")
             console.table(results)
             console.log("\n" + "Move arrows to make another choice")
+            start();
         }
     )
-    start()
-};
+}
 
 
