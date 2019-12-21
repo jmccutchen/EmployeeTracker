@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const table = require("console.table");
 const figlet = require('figlet');
+const dotenv = require('dotenv').config()
 
 figlet('Employee Manager', function (err, data) {
     if (err) {
@@ -14,9 +15,9 @@ figlet('Employee Manager', function (err, data) {
 
 const connection = mysql.createConnection({
     host: "localhost",
-    user: "root",
+    user: process.env.DB_USER,
     port: 3306,
-    password: "Discodog@1",
+    password: process.env.DB_PW,
     database: "employeeTracker_DB"
 });
 
