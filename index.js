@@ -52,7 +52,7 @@ function start() {
                 addEmployee();
             }
             else if (answer.action === "Remove Employee") {
-
+                removeEmp();
             }
             else if (answer.action === "Update Employee Role") {
 
@@ -159,14 +159,14 @@ function addEmployee() {
             ])
             .then((answer) => {
                 let query = "INSERT INTO employee (first_name, last_name) VALUES (?,?)"
-                let values = 
-                
-                connection.query(query, 
-                [answer.first, answer.last], 
-                function (err, result) {
-                    if (err) throw err;
-                   
-                })
+                let values =
+
+                    connection.query(query,
+                        [answer.first, answer.last],
+                        function (err, result) {
+                            if (err) throw err;
+
+                        })
 
             })
             .then(() => {
@@ -183,74 +183,101 @@ function addEmployee() {
                                     for (var i = 0; i < results.length; i++) {
                                         choiceArray.push(results[i].role_id + " " + results[i].title);
                                     }
-                                    
+
                                     return choiceArray;
                                 }
                             }
                         ])
-                
-                    .then((answer) => {
-                        let query = "UPDATE employee SET role_id = ? WHERE id = LAST_INSERT_ID()";
-                        let answerArray = Object.values(answer)
-                        let answerId = answerArray[0].split(" ")
-                        let roleId = answerId[0]
-                        connection.query(query, roleId , function (err, res) {
-                            if (err) throw err;
-                                
-                        });
-                    })
-                    .then(() => {
-                        connection.query("SELECT first_name, last_name, id FROM employee WHERE manager_id IS NULL and NOT id = LAST_INSERT_ID() ",
-                            function (err, results) {
+
+                        .then((answer) => {
+                            let query = "UPDATE employee SET role_id = ? WHERE id = LAST_INSERT_ID()";
+                            let answerArray = Object.values(answer)
+                            let answerId = answerArray[0].split(" ")
+                            let roleId = answerId[0]
+                            connection.query(query, roleId, function (err, res) {
                                 if (err) throw err;
 
-                                inquirer
-                                    .prompt({
-                                        name: "manager",
-                                        type: "list",
-                                        message: "What manager does this employee have?",
-                                        choices: function () {
-                                            var choiceArray = [];
-                                            for (var i = 0; i < results.length; i++) {
-                                                choiceArray.push(results[i].id + " " + results[i].first_name + " " + results[i].last_name);
+                            });
+                        })
+                        .then(() => {
+                            connection.query("SELECT first_name, last_name, id FROM employee WHERE manager_id IS NULL and NOT id = LAST_INSERT_ID() ",
+                                function (err, results) {
+                                    if (err) throw err;
+
+                                    inquirer
+                                        .prompt({
+                                            name: "manager",
+                                            type: "list",
+                                            message: "What manager does this employee have?",
+                                            choices: function () {
+                                                var choiceArray = [];
+                                                for (var i = 0; i < results.length; i++) {
+                                                    choiceArray.push(results[i].id + " " + results[i].first_name + " " + results[i].last_name);
+                                                }
+                                                return choiceArray;
                                             }
-                                            return choiceArray;
-                                        }
-                                    })
-                                    .then((answer) => {
-                                        let query = "UPDATE employee SET manager_id = ? WHERE id = LAST_INSERT_ID()";
-                                        let answerArray = Object.values(answer)
-                                        let answerId = answerArray[0].split(" ")
-                                        let managerId = answerId[0]
-                                        connection.query(query, managerId, function (err, res) {
-                                            if (err) throw err;
+                                        })
+                                        .then((answer) => {
+                                            let query = "UPDATE employee SET manager_id = ? WHERE id = LAST_INSERT_ID()";
+                                            let answerArray = Object.values(answer)
+                                            let answerId = answerArray[0].split(" ")
+                                            let managerId = answerId[0]
+                                            connection.query(query, managerId, function (err, res) {
+                                                if (err) throw err;
 
-                                        });
-                                    })
-                                    .then(() => {
-                                        start();
-                                    })
-                            })
+                                            });
+                                        })
+                                        .then(() => {
+                                            start();
+                                        })
+                                })
 
 
-                    })
+                        })
                 })
             })
-
-
-
-        
     })
 }
 
+function removeEmp() {
+    connection.query("SELECT first_name, last_name, id FROM employee",
+        function (err, results) {
+            if (err) throw err;
+            inquirer
+                .prompt([
+                    {
+                        name: "removeEmp",
+                        type: "list",
+                        message: "What employee do you need to delete?",
+                        choices: function () {
+                            var choiceArray = [];
+                            for (var i = 0; i < results.length; i++) {
+                                choiceArray.push(results[i].id + " " + results[i].first_name + " " + results[i].last_name);
+                            }
+
+                            return choiceArray;
+                        }
+                    }
+                ])
+                .then((answer) => {
+                    let query = "DELETE FROM employee WHERE id= ?";
+                    let answerArray = Object.values(answer)
+                    let answerId = answerArray[0].split(" ")
+                    let id = answerId[0]
+                    connection.query(query, id, function (err, res) {
+                        if (err) throw err;
+
+                    });
+                })
+                .then(() => {
+                    start();
+                })
 
 
 
 
-
-
-
-
+        })
+}
 
 
 
