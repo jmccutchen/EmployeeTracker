@@ -141,11 +141,106 @@ function viewAllEmpMan() {
 
 function addEmployee() {
 
-    //do a bunch of these for each entry
-    connection.query("INSERT INTO tasks (task) VALUES (?)", [req.body.task], function (err, result) {
+    connection.query("SELECT title FROM role", function (err, results) {
         if (err) throw err;
-        INSERT INTO tasks//table// (task//column) VALUES (?)
-    }
+        inquirer
+            .prompt([
+                {
+                    name: "first",
+                    type: "input",
+                    message: "What is employee's first name?"
+                },
+                {
+                    name: "last",
+                    type: "input",
+                    message: "What is employee's last name?"
+                }
+
+            ])
+            .then((answer) => {
+                let query = "INSERT INTO employee (first_name, last_name) VALUES (?,?)"
+                let values = 
+                
+                connection.query(query, 
+                [answer.first, answer.last], 
+                function (err, result) {
+                    if (err) throw err;
+                   
+                })
+
+            })
+            .then(() => {
+                connection.query("SELECT title, role_id FROM role", function (err, results) {
+                    if (err) throw err;
+                    inquirer
+                        .prompt([
+                            {
+                                name: "role",
+                                type: "list",
+                                message: "What role do they have?",
+                                choices: function () {
+                                    var choiceArray = [];
+                                    for (var i = 0; i < results.length; i++) {
+                                        choiceArray.push(results[i].role_id + " " + results[i].title);
+                                    }
+                                    
+                                    return choiceArray;
+                                }
+                            }
+                        ])
+                
+                    .then((answer) => {
+                        let query = "UPDATE employee SET role_id = ? WHERE id = LAST_INSERT_ID()";
+                        let answerArray = Object.values(answer)
+                        let answerId = answerArray[0].split(" ")
+                        let roleId = answerId[0]
+                        connection.query(query, roleId , function (err, res) {
+                            if (err) throw err;
+                                
+                        });
+                    })
+                    .then(() => {
+                        connection.query("SELECT first_name, last_name, id FROM employee WHERE manager_id IS NULL and NOT id = LAST_INSERT_ID() ",
+                            function (err, results) {
+                                if (err) throw err;
+
+                                inquirer
+                                    .prompt({
+                                        name: "manager",
+                                        type: "list",
+                                        message: "What manager does this employee have?",
+                                        choices: function () {
+                                            var choiceArray = [];
+                                            for (var i = 0; i < results.length; i++) {
+                                                choiceArray.push(results[i].id + " " + results[i].first_name + " " + results[i].last_name);
+                                            }
+                                            return choiceArray;
+                                        }
+                                    })
+                                    .then((answer) => {
+                                        let query = "UPDATE employee SET manager_id = ? WHERE id = LAST_INSERT_ID()";
+                                        let answerArray = Object.values(answer)
+                                        let answerId = answerArray[0].split(" ")
+                                        let managerId = answerId[0]
+                                        connection.query(query, managerId, function (err, res) {
+                                            if (err) throw err;
+
+                                        });
+                                    })
+                                    .then(() => {
+                                        start();
+                                    })
+                            })
+
+
+                    })
+                })
+            })
+
+
+
+        
+    })
 }
 
 
@@ -159,7 +254,7 @@ function addEmployee() {
 
 
 
-function viewAllRoles(){
+function viewAllRoles() {
     connection.query("SELECT title, salary FROM role;",
         function (err, results) {
             if (err) throw err;
@@ -172,4 +267,3 @@ function viewAllRoles(){
 };
 
 
-}

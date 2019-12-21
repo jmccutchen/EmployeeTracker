@@ -77,6 +77,15 @@ INNER JOIN department ON department.department_id = role.department_id)
 INNER JOIN employee ON role.role_id = employee.role_id) WHERE department.name = "Sales";
 
 SELECT first_name, last_name FROM employee WHERE manager_id IS NOT NULL;
+
+SELECT id, first_name, last_name, title, name, salary 
+FROM employee
+LEFT JOIN role ON (employee.role_id = role.role_id) 
+LEFT JOIN department ON (role.department_id = department.department_id) 
+WHERE manager_id = 3;
+
+SELECT title, salary
+FROM role;
            
 
 
